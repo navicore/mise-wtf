@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pulsar
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pulsar
+  template:
+    metadata:
+      labels:
+        app: pulsar
+    spec:
+      containers:
+      - name: pulsar
+        image: apachepulsar/pulsar:3.2.0
+        command: 
+        - bin/pulsar
+        - standalone
+        - --no-functions-worker
+        - --no-stream-storage
+        - --advertised-address
+        - pulsar
+        ports:
+        - name: pulsar
+          containerPort: 6650
+        - name: http
+          containerPort: 8080
+        env:
+        - name: PULSAR_MEM
+          value: "-Xms512m -Xmx512m"
+        - name: PULSAR_GC
+          value: "-XX:+UseG1GC"
+        - name: PULSAR_PREFIX_brokerServicePort
+          value: "6650"
+        - name: PULSAR_PREFIX_webServicePort
+          value: "8080"
+        - name: PULSAR_PREFIX_advertisedAddress
+          value: "pulsar"
+        - name: PULSAR_PREFIX_clusterName
+          value: "standalone"
+        # Disable features we don't need
+        - name: PULSAR_PREFIX_functionsWorkerEnabled
+          value: "false"
+        - name: PULSAR_PREFIX_systemTopicEnabled
+          value: "false"
+        - name: PULSAR_PREFIX_transactionCoordinatorEnabled
+          value: "false"
+        - name: PULSAR_PREFIX_webSocketServiceEnabled
+          value: "false"
+        resources:
+          requests:
+            memory: "768Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /admin/v2/brokers/health
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /admin/v2/brokers/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 10

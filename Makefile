@@ -78,6 +78,21 @@ rest-api-test: ## Test REST API endpoints
 rest-api-logs: ## Show REST API logs
 	kubectl logs -l app=rest-api --tail=50 -f
 
+pulsar: ## Deploy Apache Pulsar
+	./scripts/pulsar-setup.sh
+
+pulsar-create-topics: ## Create Pulsar topics
+	./scripts/pulsar-create-topics.sh
+
+pulsar-test: ## Test Pulsar messaging
+	./scripts/pulsar-test.sh
+
+pulsar-logs: ## Show Pulsar logs
+	kubectl logs deployment/pulsar --tail=50 -f
+
+pulsar-admin: ## Open Pulsar admin CLI
+	kubectl exec -it deployment/pulsar -- bin/pulsar-admin
+
 status: ## Show current status
 	@echo "=== Tool Versions ==="
 	@mise list 2>/dev/null || echo "mise not activated"

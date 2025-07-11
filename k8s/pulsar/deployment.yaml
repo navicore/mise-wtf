@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pulsar
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pulsar
+  template:
+    metadata:
+      labels:
+        app: pulsar
+    spec:
+      containers:
+      - name: pulsar
+        image: apachepulsar/pulsar:3.2.0
+        command: ["bin/pulsar", "standalone"]
+        ports:
+        - name: pulsar
+          containerPort: 6650
+        - name: http
+          containerPort: 8080
+        env:
+        - name: PULSAR_MEM
+          value: "-Xms512m -Xmx512m"
+        - name: PULSAR_PREFIX_webSocketServiceEnabled
+          value: "true"
+        - name: PULSAR_PREFIX_functionsWorkerEnabled
+          value: "false"  # Disable functions worker for simplicity
+        volumeMounts:
+        - name: pulsar-data
+          mountPath: /pulsar/data
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /admin/v2/brokers/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /admin/v2/brokers/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      volumes:
+      - name: pulsar-data
+        persistentVolumeClaim:
+          claimName: pulsar-data-pvc

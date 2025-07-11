@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pulsar
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pulsar
+  template:
+    metadata:
+      labels:
+        app: pulsar
+    spec:
+      containers:
+      - name: pulsar
+        image: apachepulsar/pulsar:3.2.0
+        command: ["bin/pulsar", "standalone", "--no-functions-worker", "--no-stream-storage"]
+        ports:
+        - name: pulsar
+          containerPort: 6650
+        - name: http
+          containerPort: 8080
+        env:
+        - name: PULSAR_MEM
+          value: "-Xms256m -Xmx256m"  # Reduced from 512m
+        - name: PULSAR_GC
+          value: "-XX:+UseG1GC"
+        - name: PULSAR_PREFIX_managedLedgerCacheSizeMB
+          value: "64"  # Reduce cache size
+        - name: PULSAR_PREFIX_webSocketServiceEnabled
+          value: "false"  # Disable websocket to save memory
+        - name: PULSAR_PREFIX_functionsWorkerEnabled
+          value: "false"
+        - name: PULSAR_PREFIX_systemTopicEnabled
+          value: "false"  # Disable system topics
+        - name: PULSAR_PREFIX_transactionCoordinatorEnabled
+          value: "false"  # Disable transactions
+        resources:
+          requests:
+            memory: "512Mi"  # Reduced from 1Gi
+            cpu: "250m"      # Reduced from 500m
+          limits:
+            memory: "768Mi"  # Reduced from 2Gi
+            cpu: "500m"      # Reduced from 1000m
+        livenessProbe:
+          httpGet:
+            path: /admin/v2/brokers/health
+            port: 8080
+          initialDelaySeconds: 90
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /admin/v2/brokers/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 10
