@@ -1,0 +1,12 @@
+[tools]
+node = "24"
+java = "17"
+go = "1.23"
+python = "3.12"
+kubectl = "latest"
+flux2 = "latest"
+kind = "latest"
+
+# Tools that need brew (documented in setup.sh):
+# - podman (needs gvproxy, mise plugin incomplete)
+# - bash (no mise plugin exists)

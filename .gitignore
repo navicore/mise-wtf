@@ -1,0 +1,29 @@
+# mise
+.mise/installs/
+.mise/cache/
+.mise/shims/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kubernetes
+*.kubeconfig
+kubeconfig
+*.key
+*.crt
+*.pem
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
