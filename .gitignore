@@ -3,6 +3,8 @@
 .mise/cache/
 .mise/shims/
 
+node_modules/
+
 # IDE
 .idea/
 .vscode/

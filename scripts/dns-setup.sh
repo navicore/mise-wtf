@@ -15,9 +15,16 @@ if ! command -v dnsmasq &> /dev/null; then
     brew install dnsmasq
 fi
 
+# Detect homebrew prefix (different for Intel vs Apple Silicon)
+BREW_PREFIX=$(brew --prefix)
+echo "Detected Homebrew prefix: $BREW_PREFIX"
+
 # Configure dnsmasq
 echo "Configuring dnsmasq..."
-DNSMASQ_CONF="/usr/local/etc/dnsmasq.conf"
+DNSMASQ_CONF="${BREW_PREFIX}/etc/dnsmasq.conf"
+
+# Create config directory if it doesn't exist
+mkdir -p "${BREW_PREFIX}/etc"
 
 # Backup existing config if it exists
 if [ -f "$DNSMASQ_CONF" ]; then
@@ -32,6 +39,11 @@ else
     echo "*.k8s.local already configured in dnsmasq"
 fi
 
+# Also configure port if not already set (to avoid conflicts)
+if ! grep -q "^port=" "$DNSMASQ_CONF" 2>/dev/null; then
+    echo "port=53" >> "$DNSMASQ_CONF"
+fi
+
 # Start/restart dnsmasq
 echo "Starting dnsmasq service..."
 if brew services list | grep -q "dnsmasq.*started"; then
@@ -39,6 +51,9 @@ if brew services list | grep -q "dnsmasq.*started"; then
 else
     sudo brew services start dnsmasq
 fi
+
+# Wait a moment for service to start
+sleep 2
 
 # Configure macOS resolver
 echo "Configuring macOS resolver..."
@@ -88,3 +103,6 @@ echo ""
 echo "Test with:"
 echo "  dig app.k8s.local"
 echo "  curl http://hello.k8s.local"
+echo ""
+echo "Note: If DNS isn't working, check that dnsmasq is running:"
+echo "  sudo brew services list"

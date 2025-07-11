@@ -1,0 +1,4 @@
+export REGISTRY_HOST=localhost
+export REGISTRY_PORT=5001
+export REGISTRY=localhost:5001
+export REGISTRY_K8S=10.89.0.4:5000

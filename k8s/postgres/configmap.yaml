@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: default
+data:
+  POSTGRES_DB: observations
+  POSTGRES_USER: apiuser
+  POSTGRES_PASSWORD: localdevpassword  # Not secure, but fine for local dev
+  # Connection string for other services
+  DATABASE_URL: postgresql://apiuser:localdevpassword@postgres:5432/observations

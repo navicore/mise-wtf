@@ -21,7 +21,10 @@ dns: ## Configure DNS for *.k8s.local
 validate: ## Validate entire setup
 	./scripts/validate.sh
 
-all: cluster ingress dns validate ## Full setup: cluster, ingress, DNS
+all: cluster registry ingress dns validate ## Full setup: cluster, registry, ingress, DNS
+
+registry: ## Set up local Docker registry
+	./scripts/registry-setup.sh
 
 clean-cluster: ## Delete kind cluster
 	kind delete cluster --name k8s-lab
@@ -54,6 +57,27 @@ podman-reset: ## Reset podman completely
 	@echo "This will destroy all podman data. Continue? [y/N]"
 	@read ans && [ $${ans:-N} = y ] && (podman machine stop; podman machine rm -f; podman system reset -f)
 
+postgres: ## Deploy PostgreSQL database
+	./scripts/postgres-setup.sh
+
+postgres-connect: ## Connect to PostgreSQL CLI
+	./scripts/postgres-connect.sh
+
+postgres-seed: ## Seed test data into PostgreSQL
+	./scripts/postgres-seed-data.sh
+
+postgres-port-forward: ## Port forward PostgreSQL to localhost:5432
+	kubectl port-forward svc/postgres 5432:5432
+
+rest-api: ## Build and deploy REST API
+	./scripts/rest-api-setup.sh
+
+rest-api-test: ## Test REST API endpoints
+	./scripts/rest-api-test.sh
+
+rest-api-logs: ## Show REST API logs
+	kubectl logs -l app=rest-api --tail=50 -f
+
 status: ## Show current status
 	@echo "=== Tool Versions ==="
 	@mise list 2>/dev/null || echo "mise not activated"
@@ -66,3 +90,9 @@ status: ## Show current status
 	@echo ""
 	@echo "=== Ingresses ==="
 	@kubectl get ingress 2>/dev/null || echo "No ingresses or cluster not accessible"
+	@echo ""
+	@echo "=== Services ==="
+	@kubectl get svc 2>/dev/null || echo "No services"
+	@echo ""
+	@echo "=== Pods ==="
+	@kubectl get pods 2>/dev/null || echo "No pods"
