@@ -1,3 +1,8 @@
+<!-- ghmig:moved -->
+> **This repository has moved to [https://git.navicore.tech/navicore/mise-wtf](https://git.navicore.tech/navicore/mise-wtf).**
+>
+> The GitHub copy is archived and no longer maintained.
+
 # Mac K8s Lab Setup
 
 A hybrid mise/brew setup for running Kubernetes labs on macOS using podman + kind.
